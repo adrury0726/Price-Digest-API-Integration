@@ -10,3 +10,15 @@ this at least was the most difficult/time-consuming part of the project.
 
 This is a professional API I integrated for Pawnee Leasing Corporation. This was the first time I really had the opportunity to showcase my C# skills and professionally integrate an API with our website. 
 If you're here for learning purposes, I hope this can be useful to you. If you're here just to check out what I've done, I really hope you enjoy it!
+
+
+
+
+
+Key info for my project:
+
+* You'll notice in my SQL queries that I use @ApplicationNum and @SubscriberID in all of them. This is because I work for a leasing company where we have
+millions of applications. Those two variables are key information to trace each asset back to a specific application for an applicant.
+
+* My GetRequests are what I used to plug in values that are within our tables so that I can send API requests based on that information.
+
