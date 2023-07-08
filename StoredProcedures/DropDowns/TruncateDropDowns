@@ -1,0 +1,28 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/26/2023
+
+This sproc is being built in order to truncate the table whenever a user hits the button to refresh the Year/Make/Models, or in other words,
+manufacturers and models.
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestTruncateAssetDropDowns
+--DECLARE
+    @ApplicationNum INT = 37561,
+	@SubscriberID INT = 2007
+AS
+BEGIN
+
+TRUNCATE TABLE Sub2007.PriceDigestManufacturers
+TRUNCATE TABLE Sub2007.PriceDigestModels
+
+END
+GO
+
