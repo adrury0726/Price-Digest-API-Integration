@@ -11,8 +11,9 @@ Date: 6/6/2023
 This sproc is being built in order to display the configuration options that the user can select from.
 
 This sproc was a little more difficult, as there are some limitations to the website platform we use,
-which made it difficult to display the data properly on our website. I made it so that it would display the Specvalues
-as a red font and got it to list out per configurationID (unique identifier).
+which made it difficult to display the data properly on our website. However, the way our website is built,
+we are able to add html/css within our stored procedures to change the formatting a little bit. 
+I made it so that it would display the Specvalues as a red font and got it to list out per configurationID (unique identifier). 
 */
 
 ALTER PROCEDURE  sub2007.sPriceDigestGetConfigList
