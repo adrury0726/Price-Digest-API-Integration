@@ -1,0 +1,47 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 5/26/2023
+
+This sproc is being built in order to send the configurationID's for the API Request to get the specs.
+
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestSendConfigIDs
+--DECLARE
+    @ApplicationNum INT = 37369,
+	@SubscriberID INT = 2007
+AS
+BEGIN
+
+SELECT sub.ApplicationNum,
+       sub.SubscriberID,
+       sub.ConfigOptions,
+       sub.ConfigurationID,
+	   sub.AssetNum,
+	   sub.ModelName,
+       sub.TransientKey
+FROM (
+    SELECT ApplicationNum,
+           SubscriberID,
+           ConfigOptions,
+           ConfigurationID,
+		   AssetNum,
+		   ModelName,
+           TransientKey,
+           ROW_NUMBER() OVER (PARTITION BY ConfigurationID ORDER BY ConfigurationID) AS rn --We only want to select distinct ConfigurationID's. This is accomplished using the Row_Number()
+    FROM Sub2007.PriceDigestConfigOptionsList
+    WHERE ApplicationNum = @ApplicationNum
+      AND SubscriberID = @SubscriberID
+	  AND Active = 1
+) AS sub
+WHERE rn = 1
+    
+END
+GO
+
