@@ -1,0 +1,98 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 5/15/2023
+
+This sproc is being built in order to save information on the Price Digest screen for the Configurations. This will run the Configuration class
+in order to replicate the information that's displayed on the configurations screen on the Price Digest website.
+
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestConfigurationsAPICall
+--DECLARE
+    @ApplicationNum INT,
+	@SubscriberID INT,
+	@AssetNum INT,
+	@ConfigurationID INT,
+	@ModelID INT,
+	@ModelName VARCHAR(50),
+	@ModelYear VARCHAR(50),
+	@ManufacturerID INT,
+	@ManufacturerName VARCHAR(50),
+	@ClassificationID INT,
+	@ClassificationName VARCHAR(50),
+	@CategoryID INT,
+	@CategoryName VARCHAR(50),
+	@SubTypeID INT,
+	@SubTypeName VARCHAR(50),
+	@SizeClassID INT,
+	@SizeClassName VARCHAR(50),
+	@SizeClassMin INT,
+	@SizeClassMax INT,
+	@SizeClassUom VARCHAR(50),
+	@VinModelNumber VARCHAR(50)
+AS
+BEGIN
+
+DECLARE @max_assetnum INT;
+SELECT @max_assetnum = (SELECT MAX(AssetNum) FROM Sub2007.PriceDigestVINYearMakeModel WHERE SubscriberID=@SubscriberID AND ApplicationNum=@ApplicationNum)
+
+INSERT INTO Sub2007.PriceDigestConfigurations
+    (
+        ApplicationNum,
+        SubscriberID,
+        AssetNum,
+        ConfigurationId,
+        ModelId,
+        ModelName,
+        ManufacturerId,
+        ManufacturerName,
+        ClassificationId,
+        ClassificationName,
+        CategoryId,
+        CategoryName,
+        SubtypeId,
+        SubtypeName,
+        SizeClassId,
+        SizeClassName,
+        SizeClassMin,
+        SizeClassMax,
+        SizeClassUom,
+        VinModelNumber,
+        ModelYear,
+        SubmitDate
+    )
+VALUES
+    (
+        @ApplicationNum, -- ApplicationNum - int
+        @SubscriberID, -- SubscriberID - int
+        COALESCE(@max_assetnum + 1, 1), -- AssetNum - int
+        @ConfigurationID,    -- ConfigurationId - int
+        @ModelID, -- ModelId - int
+        @ModelName, -- ModelName - varchar(50)
+        @ManufacturerID, -- ManufacturerId - int
+        @ManufacturerName, -- ManufacturerName - varchar(50)
+        @ClassificationID, -- ClassificationId - int
+        @ClassificationName, -- ClassificationName - varchar(50)
+        @CategoryID, -- CategoryId - int
+        @CategoryName, -- CategoryName - varchar(50)
+        @SubTypeID, -- SubtypeId - int
+        @SubTypeName, -- SubtypeName - varchar(50)
+        @SizeClassID, -- SizeClassId - int
+        @SizeClassName, -- SizeClassName - varchar(50)
+        @SizeClassMin, -- SizeClassMin - int
+        @SizeClassMax, -- SizeClassMax - int
+        @SizeClassUom, -- SizeClassUom - varchar(10)
+        @VinModelNumber, -- VinModelNumber - varchar(50)
+        @ModelYear, -- ModelYear - varchar(10)
+        GETDATE()  -- SubmitDate - datetime
+    )
+
+END
+GO
+
