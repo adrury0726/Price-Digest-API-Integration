@@ -1,0 +1,49 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 5/25/2023
+
+This sproc is being built in order to insert data into the configurations table for our drop-down selection.
+
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestConfigInsert
+--DECLARE
+    @ApplicationNum INT = 37369,
+	@SubscriberID INT = 2007
+AS
+BEGIN
+
+    -- Check if there are existing rows with the same applicationnum
+    IF EXISTS (SELECT 1 FROM Sub2007.PriceDigestConfigOptionsList WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID)
+    BEGIN
+        -- Delete existing rows with the same applicationnum
+        DELETE FROM Sub2007.PriceDigestConfigOptionsList WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+    END
+	
+	DECLARE @AssetNum INT = (SELECT MAX(AssetNum) FROM Sub2007.PriceDigestVerificationAPIRequest WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID)
+	
+    INSERT INTO Sub2007.PriceDigestConfigOptionsList 
+    (
+	ApplicationNum, 
+	SubscriberID, 
+	ConfigurationID, 
+	AssetNum, 
+	ModelName, 
+	ModelID, 
+	ModelYear, 
+	ManufacturerName, 
+	ManufacturerID
+	)
+    SELECT DISTINCT ApplicationNum, SubscriberID, ConfigurationID, AssetNum, ModelName, ModelID, ModelYear, ManufacturerName, ManufacturerID
+    FROM Sub2007.PriceDigestVerificationAPIRequest
+    WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID AND AssetNum = @AssetNum
+
+END
+GO
+
