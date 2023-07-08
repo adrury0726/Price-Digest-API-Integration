@@ -23,3 +23,8 @@ millions of applications. Those two variables are key information to trace each 
 * My GetRequests are what I used to plug in values that are within our tables so that I can send API requests based on that information.
 
 * My ModelBuilders are what I'm using in order to run a query to get the data that's returned and plug it into my API requests.
+
+* I did set up CallLogging in all of my classes, and you can see how i have that built by referencing the RequestFormats folder. This is also
+  where you will find my initial Database Connection
+
+* Lastly, my controllers are where you will actually see the API Calls happening.
