@@ -1,0 +1,49 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/26/2023
+
+This sproc is being built in order to delete unneccessary data from tables so the user can add new assets without needing to see
+existing data being displayed for a previous asset.
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestFreshNewAsset
+--DECLARE
+    @ApplicationNum INT = 37561,
+	@SubscriberID INT = 2007
+AS
+BEGIN
+
+DELETE FROM Sub2007.PriceDigestSpecDetails 
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+
+DELETE FROM Sub2007.PriceDigestMajorComponents 
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+
+DELETE FROM Sub2007.PriceDigestSelectedTruckBodyValues 
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+
+DELETE FROM Sub2007.PriceDigestCurrentValuation 
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+
+DELETE FROM Sub2007.PriceDigestCurrentSpecs 
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+
+DELETE FROM Sub2007.PriceDigestConfigOptionsList 
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+
+DELETE FROM Sub2007.PriceDigestVINYearMakeModel 
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+
+DELETE FROM Sub2007.PriceDigestIncompleteTruckBodyBuild
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+
+END
+GO
+
