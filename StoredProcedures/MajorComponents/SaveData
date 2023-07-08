@@ -1,0 +1,33 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/15/2023
+
+This sproc is being built in order to save the Major Components
+
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestMajorComponentsSave
+--DECLARE
+	@ApplicationNum INT,
+	@SubscriberID INT,
+	@Engine VARCHAR(100),
+	@Transmission VARCHAR(100),
+	@Mileage VARCHAR(50)
+AS
+BEGIN
+
+UPDATE Sub2007.PriceDigestMajorComponents
+SET Engine = @Engine,
+	Transmission = @Transmission,
+	Mileage = @Mileage
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+
+END
+GO
+
