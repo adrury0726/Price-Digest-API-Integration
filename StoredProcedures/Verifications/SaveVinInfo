@@ -1,0 +1,100 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 4/28/2023
+
+This sproc is being built in order to save Year/Make/Model or VIN entered by the user on the Price Digest screen. The data saved here will dictate how the API is called.
+
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestGetVINSave
+--DECLARE
+    @ApplicationNum INT,
+	@SubscriberID INT,
+	@VinNum VARCHAR(50),
+	@VehicleCategory VARCHAR(50),
+	@VehicleYear VARCHAR(4),
+	@VehicleMake VARCHAR(50),
+	@VehicleModel VARCHAR(50),
+	@PriceDigestOverride TINYINT
+	
+AS
+BEGIN
+
+
+DECLARE @max_assetnum INT;
+SELECT @max_assetnum = MAX(assetnum)FROM Sub2007.PriceDigestVINYearMakeModel WHERE SubscriberID=@SubscriberID AND ApplicationNum=@ApplicationNum
+
+--Delete the null entry we have
+DELETE FROM Sub2007.PriceDigestVINYearMakeModel WHERE RequestDate IS NULL AND ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+
+INSERT INTO Sub2007.PriceDigestVINYearMakeModel
+    (
+        SubscriberID,
+        ApplicationNum,
+        AssetNum,
+        VinNum,
+        VehicleCategory,
+        VehicleYear,
+        VehicleMake,
+        VehicleModel,
+        PriceDigestOverride,
+        RequestDate
+    )
+VALUES
+    (
+        @SubscriberID, -- SubscriberID - int
+        @ApplicationNum, -- ApplicationNum - int
+        COALESCE(@max_assetnum + 1, 1),    -- AssetNum - int
+        @VinNum, -- VinNum - varchar(50)
+        @VehicleCategory, -- VehicleCategory - varchar(50)
+        @VehicleYear, -- VehicleYear - varchar(4)
+        @VehicleMake, -- VehicleMake - varchar(50)
+        @VehicleModel, -- VehicleModel - varchar(50)
+        @PriceDigestOverride, -- PriceDigestOverride - tinyint
+        GETDATE() -- RequestDate - datetime
+    )
+
+--Updates the VehicleMake according to what VehicleCategory is selected 
+DECLARE @ClassificationID INT
+
+SELECT TOP 1 @ClassificationID = cl.ClassificationID 
+FROM Sub2007.PriceDigestVINYearMakeModel ymm
+LEFT JOIN Sub2007.PriceDigestClassifications cl ON cl.ClassificationName = ymm.VehicleCategory
+WHERE ymm.ApplicationNum = @ApplicationNum AND ymm.SubscriberID = @SubscriberID
+ORDER BY ymm.RequestDate DESC 
+
+
+--Updates the model list according to what vehicleCategory is selected
+DECLARE @ManufacturerID INT
+
+SELECT TOP 1 @ManufacturerID = m.ManufacturerID
+FROM Sub2007.PriceDigestVINYearMakeModel ymm
+LEFT JOIN Sub2007.PriceDigestModels m ON m.ManufacturerName = ymm.VehicleMake
+WHERE ymm.ApplicationNum = @ApplicationNum AND ymm.SubscriberID = 2007
+ORDER BY ymm.RequestDate DESC 
+
+--Updating the table here
+
+UPDATE Sub2007.PriceDigestVINYearMakeModel
+	   SET ClassificationID = @ClassificationID,
+		   ManufacturerID = @ManufacturerID
+WHERE ApplicationNum = @ApplicationNum 
+	  AND SubscriberID = @SubscriberID 
+	  AND AssetNum = 
+	  (SELECT MAX(AssetNum)
+       FROM Sub2007.PriceDigestVINYearMakeModel
+       WHERE ApplicationNum = @ApplicationNum
+             AND SubscriberID = @SubscriberID);
+
+
+ 
+END
+
+GO
+
