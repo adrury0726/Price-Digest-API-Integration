@@ -1,0 +1,39 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 5/31/2023
+
+This sproc is being built in order to save information for Price Digest whenever the user hits the "Get Results" button.
+
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestSelectedConfigSave
+--DECLARE
+    @ApplicationNum INT = 37369,
+	@SubscriberID INT = 2007,
+	@ConfigurationID INT
+AS
+BEGIN
+
+------Setting all current options that are active to 0 each time the button is pressed
+------This way we don't get more than 1 configurationID set to active.
+
+UPDATE Sub2007.PriceDigestCurrentSpecs
+SET Active = NULL
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+
+
+UPDATE Sub2007.PriceDigestCurrentSpecs
+SET Active = 1
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+	  AND ConfigurationID = @ConfigurationID
+
+
+END
+GO
+
