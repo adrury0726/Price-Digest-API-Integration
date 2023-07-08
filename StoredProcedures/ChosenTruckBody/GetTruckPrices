@@ -1,0 +1,94 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/23/2023
+
+This sproc is being built in order to insert into the valuations for the selected incomplete truck body.
+
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestIncompleteTruckValuationAPICall
+--DECLARE
+	@ApplicationNum INT,
+	@SubscriberID INT,
+	@ConfigurationID INT,
+	@ModelID INT,
+	@ModelName VARCHAR(100),
+	@ManufacturerID INT,
+	@ManufacturerName VARCHAR(100),
+	@ClassificationID INT,
+	@ClassificationName VARCHAR(100),
+	@CategoryID INT,
+	@SizeClassID INT,
+	@SizeClassName VARCHAR(100),
+	@ModelYear VARCHAR(4),
+	@MSRP INT,
+	@UnadjustedFinance INT,
+	@UnadjustedRetail INT,
+	@UnadjustedWholesale INT,
+	@UnadjustedTradeIn INT
+
+AS
+BEGIN
+
+
+DECLARE @max_assetnum INT;
+SELECT @max_assetnum = (SELECT MAX(AssetNum) FROM Sub2007.PriceDigestCurrentValuation 
+						WHERE SubscriberID=@SubscriberID AND ApplicationNum=@ApplicationNum
+						AND ConfigurationID = @ConfigurationID)
+
+
+INSERT INTO Sub2007.PriceDigestIncompleteTruckBodyValuation
+    (
+        ApplicationNum,
+        SubscriberID,
+        AssetNum,
+        modelId,
+        modelName,
+        manufacturerId,
+        manufacturerName,
+        classificationId,
+        classificationName,
+        categoryId,
+        sizeClassId,
+		SizeClassName,
+        modelYear,
+        configurationId,
+        MSRP,
+        unadjustedFinance,
+        unadjustedRetail,
+        unadjustedWholesale,
+        unadjustedTradeIn
+    )
+VALUES
+    (
+        @ApplicationNum, -- ApplicationNum - int
+        @SubscriberID, -- SubscriberID - int
+        COALESCE(@max_assetnum, 1), -- AssetNum - int
+        @ModelID, -- modelId - int
+        @ModelName, -- modelName - varchar(50)
+        @ManufacturerID, -- manufacturerId - int
+        @ManufacturerName, -- manufacturerName - varchar(50)
+        @ClassificationID, -- classificationId - int
+        @ClassificationName, -- classificationName - varchar(50)
+        @CategoryID, -- categoryId - int
+        @SizeClassID, -- sizeClassId - int
+		@SizeClassName, -- sizeClassName - varchar(100)
+        @ModelYear, -- modelYear - varchar(4)
+        @ConfigurationID, -- configurationId - int
+        @MSRP, -- MSRP - int
+        @UnadjustedFinance, -- unadjustedFinance - int
+        @UnadjustedRetail, -- unadjustedRetail - int
+        @UnadjustedWholesale, -- unadjustedWholesale - int
+        @UnadjustedTradeIn  -- unadjustedTradeIn - int
+    )
+
+END
+
+GO
+
