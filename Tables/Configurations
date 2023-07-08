@@ -1,0 +1,80 @@
+--These tables are used for the configurations of each asset.
+
+--Bulk info
+CREATE TABLE [Sub2007].[PriceDigestConfigurations]
+(
+[ApplicationNum] [int] NULL,
+[SubscriberID] [int] NULL,
+[AssetNum] [int] NULL,
+[ConfigurationId] [int] NOT NULL,
+[ModelId] [int] NULL,
+[ModelName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ManufacturerId] [int] NULL,
+[ManufacturerName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ClassificationId] [int] NULL,
+[ClassificationName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CategoryId] [int] NULL,
+[CategoryName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SubtypeId] [int] NULL,
+[SubtypeName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SizeClassId] [int] NULL,
+[SizeClassName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SizeClassMin] [int] NULL,
+[SizeClassMax] [int] NULL,
+[SizeClassUom] [varchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[VinModelNumber] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ModelYear] [varchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1),
+[SubmitDate] [datetime] NULL
+) ON [PRIMARY]
+GO
+
+
+--Specs we'll display on screen for the user
+CREATE TABLE [Sub2007].[PriceDigestDisplaySpecs]
+(
+[ApplicationNum] [int] NULL,
+[SubscriberID] [int] NULL,
+[AssetNum] [int] NULL,
+[ConfigurationId] [int] NULL,
+[SpecName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SpecValue] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SpecNameFriendly] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SpecUom] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SpecDescription] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SpecFamily] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1),
+[SubmitDate] [datetime] NULL
+) ON [PRIMARY]
+GO
+
+--Options available for the user to select
+CREATE TABLE [Sub2007].[PriceDigestConfigOptionsList]
+(
+[ConfigOptions] [varchar] (200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ApplicationNum] [int] NULL,
+[SubscriberID] [int] NULL,
+[AssetNum] [int] NULL,
+[ConfigurationID] [int] NULL,
+[ManufacturerName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ManufacturerID] [int] NULL,
+[ModelName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ModelID] [int] NOT NULL,
+[ModelYear] [varchar] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[Active] [tinyint] NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1)
+) ON [PRIMARY]
+GO
+
+--Specs of the selected option
+CREATE TABLE [Sub2007].[PriceDigestCurrentSpecs]
+(
+[ApplicationNum] [int] NULL,
+[SubscriberID] [int] NULL,
+[ConfigurationID] [int] NULL,
+[SpecName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SpecValue] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1),
+[Active] [tinyint] NULL
+) ON [PRIMARY]
+GO
