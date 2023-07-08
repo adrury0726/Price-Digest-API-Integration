@@ -1,0 +1,40 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/8/2023
+
+This sproc is being built in order to get the years for the VehicleCategory drop-down from Price Digest starting with 1981.
+
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestVehicleYearCombo
+--DECLARE
+	@ApplicationNum INT = 37369,
+	@SubscriberID INT = 2007
+AS
+BEGIN
+
+--Selecting every year since 1981, as that's what PriceDigest keeps.
+WITH CTE_Years AS (
+  SELECT 1981 AS Year
+  UNION ALL
+  SELECT Year + 1
+  FROM CTE_Years
+  WHERE Year < YEAR(GETDATE()) + 1 -- Modify the condition here
+)
+
+SELECT Year AS ValueData,
+	   Year AS DisplayData
+FROM CTE_Years
+WHERE Year <= YEAR(GETDATE()) + 1 -- Add a filter to limit the results
+ORDER BY CTE_Years.Year DESC
+OPTION (MAXRECURSION 0);
+
+END
+GO
+
