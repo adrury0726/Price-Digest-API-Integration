@@ -1,0 +1,69 @@
+-- These two tables are where all my logs are being stored, and the view is just both of these tables combined.
+
+CREATE TABLE [Sub2007].[tPriceDigestCallGroup]
+(
+[CallId] [int] NOT NULL IDENTITY(1, 1),
+[ApplicationNum] [int] NULL,
+[UserNum] [int] NULL,
+[StartDate] [datetime] NULL,
+[SubscriberId] [int] NULL,
+[CallType] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CallStatus] [int] NULL
+) ON [PRIMARY]
+GO
+
+
+CREATE TABLE [Sub2007].[tPriceDigestCallLog]
+(
+[RunDate] [datetime] NOT NULL,
+[CustomMessage] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[Response] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[RequestBody] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[RequestUrl] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[Method] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[RequestHeaders] [varchar] (1000) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ResponseHeaders] [varchar] (1000) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[curl] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[Error] [tinyint] NULL,
+[RunTimeInMS] [int] NULL,
+[CallId] [int] NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+CREATE VIEW Sub2007.vAllPriceDigestCalls AS 
+SELECT 
+	g.CallId
+	,g.CallType
+	,stat.ItemName AS CallStatusDesc
+    ,l.CustomMessage
+    ,g.ApplicationNum
+	,a.ClientID
+	,a.LeaseName
+	,u.UserFullName
+    ,l.RunDate
+    ,l.Method
+    ,l.Error
+    ,l.Response
+    ,l.RequestBody
+    ,l.curl
+    ,l.RunTimeInMS
+    ,l.RequestUrl
+    ,l.RequestHeaders
+    ,l.ResponseHeaders
+    ,g.StartDate
+    ,g.SubscriberId
+	,g.UserNum
+	,g.CallStatus
+FROM Sub2007.tPriceDigestCallGroup g
+	LEFT JOIN Sub2007.tPriceDigestCallLog l ON l.CallId = g.CallId
+	LEFT JOIN dbo.tApplication a ON g.ApplicationNum = a.ApplicationNum 
+	LEFT JOIN dbo.tUser u ON u.UserNum = g.UserNum
+	LEFT JOIN dbo.tLookup stat ON stat.ItemData = CAST(g.CallStatus AS VARCHAR(100)) AND stat.ItemCategory = 'PriceDigestIntegrationCallStatus'
+ORDER BY 
+	g.CallId DESC, l.RunDate DESC OFFSET 0 ROWS 
+
+GO
