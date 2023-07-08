@@ -1,0 +1,30 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/22/2023
+
+This sproc is being built in order to delete from the table that builts the AssetSelection drop-down so we don't have data we don't want
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestDeleteAssetSelectionInfo
+--DECLARE
+    @ApplicationNum INT = 37569,
+	@SubscriberID INT = 2007
+AS
+BEGIN
+
+IF EXISTS(SELECT 1 FROM Sub2007.PriceDigestIncompleteTruckSpecs WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID)
+BEGIN
+DELETE FROM Sub2007.PriceDigestIncompleteTruckSpecs
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+END
+
+END
+GO
+
