@@ -1,0 +1,42 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/6/2023
+
+This sproc is being built in order to display the Specifications of the selected configuration. Very similiar to my sub2007.sPriceDigestGetConfigList in the
+Configurations folder, this sproc is using HTML to change the color of the text. The difference between this sproc and the GetConfigList is that this data
+is the full list of specifications on the asset, as opposed to just key specs.
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestGetSpecsDisplay
+--DECLARE
+    @ApplicationNum INT = 37561,
+	@SubscriberID INT = 2007
+AS
+BEGIN
+
+   --CHAR(13) + CHAR(10) + 
+	SELECT 
+    p1.SpecFamily AS Name1, 
+	p1.ConfigurationID AS ConfigID,
+    STUFF(
+        (
+            SELECT CHAR(13) + CHAR(10) +  ( '<Font color=''red''>' +'&nbsp&nbsp&nbsp&nbsp'+p2.SpecNameFriendly + ': '+'</Font>' + p2.SpecValue)+'<br>  '
+            FROM Sub2007.PriceDigestSpecDetails p2
+            WHERE p1.SpecFamily = p2.SpecFamily AND p2.ApplicationNum=@ApplicationNum  AND p2.SpecValue IS NOT null
+            FOR XML PATH(''), TYPE
+        ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') AS Value1, 
+    ROW_NUMBER() OVER (ORDER BY p1.SpecFamily) AS 'TransientKey'
+FROM Sub2007.PriceDigestSpecDetails p1
+WHERE p1.ApplicationNum = @ApplicationNum AND p1.SubscriberID = @SubscriberID
+GROUP BY p1.SpecFamily, p1.ConfigurationID;
+
+END
+GO
+
