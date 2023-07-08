@@ -1,0 +1,66 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/2/2023
+
+This sproc is being built in order to actually do the call to go get the specifications via the configID.
+
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestGrabSpecificationsAPICall
+--DECLARE
+    @ApplicationNum INT,
+	@SubscriberID INT,
+	@AssetNum INT,
+	@SpecName VARCHAR(100),
+	@SpecValue VARCHAR(100),
+	@SpecNameFriendly VARCHAR(100),
+	@SpecUom VARCHAR(100),
+	@SpecDescription VARCHAR(100),
+	@SpecFamily VARCHAR(100),
+	@ConfigurationID INT 
+
+AS
+BEGIN
+
+
+DECLARE @max_assetnum INT;
+SELECT @max_assetnum = (SELECT MAX(AssetNum) FROM Sub2007.PriceDigestVINYearMakeModel WHERE SubscriberID=@SubscriberID AND ApplicationNum=@ApplicationNum)
+
+INSERT INTO Sub2007.PriceDigestSpecDetails
+    (
+        ApplicationNum,
+        SubscriberID,
+        AssetNum,
+		ConfigurationId,
+        SpecName,
+	    SpecValue,
+        SpecNameFriendly,
+        SpecUom,
+        SpecDescription,
+        SpecFamily,
+        SubmitDate
+    )
+VALUES
+    (
+        @ApplicationNum, -- ApplicationNum - int
+        @SubscriberID, -- SubscriberID - int
+        COALESCE(@max_assetnum + 1, 1), -- AssetNum - int
+		@ConfigurationID, -- ConfigurationID - int
+        @SpecName, -- SpecName - varchar(50)
+        @SpecValue, -- SpecValue - varchar(50)
+        @SpecNameFriendly, -- SpecNameFriendly - varchar(50)
+        @SpecUom, -- SpecUom - varchar(10)
+        @SpecDescription, -- SpecDescription - varchar(100)
+        @SpecFamily, -- SpecFamily - varchar(50)
+        GETDATE()  -- SubmitDate - datetime
+    )
+
+END
+GO
+
