@@ -1,0 +1,78 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/9/2023
+
+This sproc is being built in order to get the values for the selected truck body via the API call.
+
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestGetSelectedTruckBodyValuesAPICall
+--DECLARE
+    @ApplicationNum INT,
+	@SubscriberID INT,
+	@SpecName VARCHAR(50),
+	@SpecValue VARCHAR(50),
+	@SpecNameFriendly VARCHAR(50),
+	@SpecUom VARCHAR(50),
+	@SpecDescription VARCHAR(50),
+	@SpecFamily VARCHAR(50),
+	@ConfigurationID INT
+
+AS
+BEGIN
+
+DECLARE @AssetNum INT = (SELECT MAX(AssetNum) FROM Sub2007.PriceDigestSpecDetails WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID)
+DECLARE @TruckBodyAssetNum INT 
+
+    -- Check if TruckBodyAssetNum already exists for the given ConfigurationID
+    SELECT @TruckBodyAssetNum = TruckBodyAssetNum
+    FROM Sub2007.PriceDigestIncompleteTruckSpecs
+    WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID AND ConfigurationId = @ConfigurationID;
+
+    -- If TruckBodyAssetNum is not found, assign a new value
+    IF @TruckBodyAssetNum IS NULL
+        SET @TruckBodyAssetNum = COALESCE((SELECT MAX(TruckBodyAssetNum) FROM Sub2007.PriceDigestIncompleteTruckSpecs WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID) + 1, 1);
+
+
+INSERT INTO Sub2007.PriceDigestIncompleteTruckSpecs
+    (
+        ApplicationNum,
+        SubscriberID,
+		TruckBodyAssetNum,
+        AssetNum,
+		ConfigurationId,
+        SpecName,
+	    SpecValue,
+        SpecNameFriendly,
+        SpecUom,
+        SpecDescription,
+        SpecFamily,
+        SubmitDate,
+		Active
+    )
+VALUES
+    (
+        @ApplicationNum, -- ApplicationNum - int
+        @SubscriberID, -- SubscriberID - int
+		@TruckBodyAssetNum, -- TruckBodyAssetNum - int
+        @AssetNum, -- AssetNum - int
+		@ConfigurationID, -- ConfigurationID - int
+        @SpecName, -- SpecName - varchar(50)
+        @SpecValue, -- SpecValue - varchar(50)
+        @SpecNameFriendly, -- SpecNameFriendly - varchar(50)
+        @SpecUom, -- SpecUom - varchar(10)
+        @SpecDescription, -- SpecDescription - varchar(100)
+        @SpecFamily, -- SpecFamily - varchar(50)
+        GETDATE(),  -- SubmitDate - datetime
+		NULL -- Active - tinyint
+    )
+
+END
+GO
+
