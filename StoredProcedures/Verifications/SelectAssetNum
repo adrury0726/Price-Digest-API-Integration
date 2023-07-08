@@ -1,0 +1,28 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/28/2023
+This sproc is being built in order to grab the assetNum for our intial calls with the VIN or YMM. We want this to
+be assigning each call as a grouped up AssetNum, but that's not working in SQL due to the looping.
+*/
+
+ALTER PROCEDURE Sub2007.PriceDigestGetAssetNum
+--DECLARE
+    @ApplicationNum INT = 37545,
+    @SubscriberID INT = 2007
+AS
+BEGIN
+
+
+SELECT COALESCE(MAX(AssetNum), 0) AS AssetNum
+FROM Sub2007.PriceDigestVerificationAPIRequest
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+
+
+END
+
+GO
+
