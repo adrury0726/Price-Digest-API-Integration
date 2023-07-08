@@ -15,10 +15,11 @@ If you're here for learning purposes, I hope this can be useful to you. If you'r
 
 
 
-Key info for my project:
+Key side notes for my project:
 
 * You'll notice in my SQL queries that I use @ApplicationNum and @SubscriberID in all of them. This is because I work for a leasing company where we have
 millions of applications. Those two variables are key information to trace each asset back to a specific application for an applicant.
 
 * My GetRequests are what I used to plug in values that are within our tables so that I can send API requests based on that information.
 
+* My ModelBuilders are what I'm using in order to run a query to get the data that's returned and plug it into my API requests.
