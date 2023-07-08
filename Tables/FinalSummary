@@ -1,0 +1,13 @@
+--This will hold the final price of the assets. The user may want more than 1 asset or multiples of an asset,
+--so this will be where the calculated value is held.
+
+CREATE TABLE [Sub2007].[PriceDigestFinalSummary]
+(
+[ApplicationNum] [int] NOT NULL,
+[SubscriberID] [int] NOT NULL,
+[ConfigurationID] [int] NOT NULL,
+[AssetName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[TotalPrice] [int] NOT NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1)
+) ON [PRIMARY]
+GO
