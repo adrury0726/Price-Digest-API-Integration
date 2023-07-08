@@ -1,0 +1,101 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/9/2023
+
+This sproc is being built in order to save the truck body buildout information for Price Digest 
+whenever the description of the asset in the Specifications says it's Incomplete.
+
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestTruckBodyBuildSave
+--DECLARE
+    @ApplicationNum INT,
+	@SubscriberID INT,
+	@Category VARCHAR(100),
+	@ModelYear VARCHAR(4),
+	@ModelName VARCHAR(100),
+	@AssetSelection VARCHAR(100)
+AS
+BEGIN
+
+--Set everything in IncompleteTruckSpace to inactive, as we only want the selected one.
+UPDATE Sub2007.PriceDigestIncompleteTruckSpecs
+SET Active = 0
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+
+    -- Perform UPDATE operation
+    UPDATE Sub2007.PriceDigestIncompleteTruckBodyBuild
+    SET Category = @Category,
+        ModelYear = @ModelYear,
+		ModelName = @ModelName,
+		AssetSelection = @AssetSelection
+    WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID;
+
+---Set the selected Asset's Active row to 1
+UPDATE ts
+SET ts.Active = 1
+FROM Sub2007.PriceDigestIncompleteTruckSpecs ts
+JOIN Sub2007.PriceDigestIncompleteTruckSpecs Msrp ON ts.ConfigurationId = Msrp.ConfigurationId
+WHERE ts.ApplicationNum = @ApplicationNum
+    AND ts.SubscriberID = @SubscriberID
+    AND ts.SpecName = 'description'
+    AND Msrp.SpecName = 'msrp'
+    AND EXISTS (
+        SELECT 1
+        FROM Sub2007.PriceDigestIncompleteTruckBodyBuild tbb
+        WHERE tbb.AssetSelection LIKE '%' + CONCAT(ts.SpecValue, ' ', Msrp.SpecValue) + '%'
+            AND tbb.ApplicationNum = @ApplicationNum
+            AND tbb.SubscriberID = @SubscriberID
+    );
+
+---Set the selected Asset's MSRP row to 1
+UPDATE Msrp
+SET Msrp.Active = 1
+FROM Sub2007.PriceDigestIncompleteTruckSpecs ts
+JOIN Sub2007.PriceDigestIncompleteTruckSpecs Msrp ON ts.ConfigurationId = Msrp.ConfigurationId
+WHERE ts.ApplicationNum = @ApplicationNum
+    AND ts.SubscriberID = @SubscriberID
+    AND ts.SpecName = 'description'
+    AND Msrp.SpecName = 'msrp'
+    AND EXISTS (
+        SELECT 1
+        FROM Sub2007.PriceDigestIncompleteTruckBodyBuild tbb
+        WHERE tbb.AssetSelection LIKE '%' + CONCAT(ts.SpecValue, ' ', Msrp.SpecValue) + '%'
+            AND tbb.ApplicationNum = @ApplicationNum
+            AND tbb.SubscriberID = @SubscriberID
+    );
+
+--Set the configurationID to whatever the selected asset is
+UPDATE tbb
+SET tbb.ConfigurationID = ts.ConfigurationId
+FROM Sub2007.PriceDigestIncompleteTruckBodyBuild tbb
+LEFT JOIN Sub2007.PriceDigestIncompleteTruckSpecs ts ON ts.ApplicationNum = tbb.ApplicationNum
+WHERE tbb.ApplicationNum = @ApplicationNum AND tbb.SubscriberID = @SubscriberID AND ts.Active = 1
+
+
+--Reset the Asset Selection if the Category or ModelName are null.
+DECLARE @CurrentModelName VARCHAR(100),
+		@CurrentCategory VARCHAR(100)
+
+SELECT @CurrentModelName = ModelName,
+	   @CurrentCategory = Category
+FROM Sub2007.PriceDigestIncompleteTruckBodyBuild
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+
+IF @CurrentModelName IS NULL OR @CurrentCategory IS NULL 
+BEGIN
+UPDATE Sub2007.PriceDigestIncompleteTruckBodyBuild
+SET AssetSelection = NULL
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+END
+
+
+END
+GO
+
