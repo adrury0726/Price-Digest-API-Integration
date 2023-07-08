@@ -1,0 +1,18 @@
+--This table is created for displaying key information to the list of assets.
+
+CREATE TABLE [Sub2007].[PriceDigestSpecDetails]
+(
+[ApplicationNum] [int] NULL,
+[SubscriberID] [int] NULL,
+[AssetNum] [int] NULL,
+[SpecName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SpecValue] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SpecNameFriendly] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SpecUom] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SpecDescription] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SpecFamily] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1),
+[SubmitDate] [datetime] NULL,
+[ConfigurationID] [int] NULL
+) ON [PRIMARY]
+GO
