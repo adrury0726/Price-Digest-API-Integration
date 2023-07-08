@@ -1,0 +1,29 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/21/2023
+
+This sproc is being built in order to delete the row from the Truck Body Build.
+This is in case the user changes their mind or has the wrong truck for any reason.
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestDeleteTruckBody
+--DECLARE
+    @ApplicationNum INT,
+	@SubscriberID INT,
+	@TransientKey INT
+AS
+BEGIN
+
+DELETE FROM Sub2007.PriceDigestSelectedTruckBodyValues 
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+AND TransientKey = @TransientKey
+
+END
+GO
