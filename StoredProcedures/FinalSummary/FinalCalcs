@@ -1,0 +1,67 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/19/2023
+
+This sproc is being built in order to calculate the Results of our assets for Price Digest.
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestCalcFinalResults
+--DECLARE
+    @ApplicationNum INT = 37569,
+	@SubscriberID INT = 2007
+AS
+BEGIN
+
+DECLARE @AssetNum INT = (SELECT MAX(AssetNum) FROM Sub2007.PriceDigestVerificationAPIRequest WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID)
+DECLARE @AssetFullName VARCHAR(100)
+
+SELECT @AssetFullName = ModelYear + ' ' + ManufacturerName + ' ' + ModelName
+FROM Sub2007.PriceDigestConfigOptionsList
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID AND AssetNum = @AssetNum AND Active = 1
+GROUP BY ModelYear, ManufacturerName, ModelName, AssetNum
+
+--Inserting into the summary table by selecting the data in our AdjustedResults table and inserting them.
+INSERT INTO Sub2007.PriceDigestFinalSummary (
+    ApplicationNum,
+    SubscriberID,
+    ConfigurationID,
+    AssetName,
+    TotalPrice
+)
+SELECT
+    ar.ApplicationNum,
+    ar.SubscriberID,
+    ar.ConfigurationID,
+    CASE
+        WHEN ar.ManufacturerID IS NULL THEN ar.ManufacturerName
+        ELSE @AssetFullName
+    END,
+    CASE
+        WHEN ar.AdjustedRetail IS NOT NULL THEN (ar.NumOfAsset * ar.AdjustedRetail)
+        ELSE ar.MSRP
+    END
+FROM
+    Sub2007.PriceDigestAdjustedResults ar
+WHERE
+    ar.ApplicationNum = @ApplicationNum
+    AND ar.SubscriberID = @SubscriberID
+    AND NOT EXISTS (
+        SELECT 1
+        FROM Sub2007.PriceDigestFinalSummary fs
+        WHERE fs.ConfigurationID = ar.ConfigurationID
+		AND fs.ApplicationNum = @ApplicationNum 
+		AND fs.SubscriberID = @SubscriberID
+    );
+
+
+
+END
+GO
+
