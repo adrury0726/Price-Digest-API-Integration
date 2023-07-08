@@ -1,0 +1,49 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/21/2023
+
+This sproc is being built in order to select an option out of the AssetSelection drop-down once the API Call has been done.
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestAssetSelectionCombo
+--DECLARE
+    @ApplicationNum INT = 37369,
+	@SubscriberID INT = 2007
+AS
+BEGIN
+
+SELECT
+    CONCAT(ts.SpecValue, ' ', Msrp.SpecValue) AS ValueData,
+	CONCAT(ts.SpecValue, ' ', Msrp.SpecValue) AS DisplayData
+FROM Sub2007.PriceDigestIncompleteTruckSpecs AS ts
+JOIN Sub2007.PriceDigestIncompleteTruckSpecs AS Msrp ON ts.ConfigurationId = Msrp.ConfigurationId
+WHERE
+    ts.ApplicationNum = @ApplicationNum
+    AND ts.SubscriberID = @SubscriberID
+    AND ts.SpecName = 'description'
+    AND Msrp.SpecName = 'msrp'
+    AND ts.AssetNum = Msrp.AssetNum
+    AND ts.AssetNum = (
+        SELECT MAX(AssetNum)
+        FROM Sub2007.PriceDigestIncompleteTruckSpecs
+        WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+    )
+ORDER BY 
+    CASE
+        WHEN ts.SpecValue LIKE '%[^0-9.]%' THEN
+            CASE
+                WHEN ISNUMERIC(REPLACE(ts.SpecValue, ' CU. YD.', '')) = 1 THEN CAST(REPLACE(ts.SpecValue, ' CU. YD.', '') AS FLOAT) --Needed for display purposes. 
+                ELSE 0 -- Replace with an appropriate default value if necessary
+            END
+        ELSE ts.SpecValue
+    END ASC;
+END
+GO
+
