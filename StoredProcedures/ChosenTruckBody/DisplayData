@@ -1,0 +1,34 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/21/2023
+
+This sproc is being built in order to fill out the Truck Body whenever the configuration selected has an Incomplete Truck Body and has been built. (Reads as 'I' under description in the specifications form)
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestChosenTruckBodyBuildGet
+--DECLARE
+    @ApplicationNum INT = 37569,
+	@SubscriberID INT = 2007
+AS
+BEGIN
+
+SELECT ApplicationNum,
+	   SubscriberID,
+	   ConfigurationId,
+	   ModelDescription,
+	   FORMAT(CAST(MSRP AS DECIMAL), 'C0') AS MSRP,
+	   TransientKey
+FROM Sub2007.PriceDigestSelectedTruckBodyValues
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+ORDER BY TransientKey DESC 
+
+END
+GO
+
