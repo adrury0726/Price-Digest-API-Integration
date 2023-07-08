@@ -1,0 +1,41 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/6/2023
+
+This sproc is being built in order to display the Results section of the asset for Price Digest.
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestGetResults
+--DECLARE
+    @ApplicationNum INT = 37561,
+	@SubscriberID INT = 2007
+AS
+BEGIN
+
+
+SELECT ar.ApplicationNum,
+       ar.SubscriberID,
+       ar.ConfigurationID,
+       CASE WHEN ar.ManufacturerID IS NOT NULL THEN ar.AssetFullName ELSE ar.ManufacturerName END AS Assets,
+       ar.NumOfAsset,
+       FORMAT(ar.MSRP, 'C0') AS MSRP,
+       FORMAT(ar.AdjustedRetail, 'C0') AS RetailValue,
+       mc.Mileage AS Mileage,
+	   FORMAT(ar.TotalPrice, 'C0') AS TotalPrice,
+       ar.TransientKey
+       --FORMAT((ar.AdjustedRetail * ar.NumOfAsset), 'C0') AS TotalPrice
+FROM Sub2007.PriceDigestAdjustedResults ar
+LEFT JOIN Sub2007.PriceDigestMajorComponents mc ON mc.ApplicationNum = ar.ApplicationNum
+WHERE ar.ApplicationNum = @ApplicationNum AND ar.SubscriberID = @SubscriberID
+ORDER BY ar.TransientKey
+
+END
+GO
+
