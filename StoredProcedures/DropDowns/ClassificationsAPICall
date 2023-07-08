@@ -1,0 +1,51 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/7/2023
+
+This sproc is being built in order to insert into the Classifications table for the drop-downs when selecting an asset
+
+*/
+
+ALTER PROCEDURE sub2007.PriceDigestClassificationsAPICall
+--DECLARE
+    @ClassificationID INT,
+	@ClassificationName VARCHAR(100)
+
+AS
+BEGIN
+
+
+INSERT INTO Sub2007.PriceDigestClassifications
+    (
+        ClassificationID,
+        ClassificationName
+    )
+VALUES
+    (
+        @ClassificationID, -- ClassificationID - int
+        @ClassificationName  -- ClassificationName - varchar(100)
+    )
+
+
+-----We want this delete to delete the old insert and keep the new one each time we do this call. 
+DELETE FROM Sub2007.PriceDigestClassifications
+WHERE ClassificationName = @ClassificationName -- Replace with the value being inserted
+    AND ClassificationID = @ClassificationID -- Replace with the value being inserted
+    AND transientkey < (
+        SELECT MAX(transientkey)
+        FROM Sub2007.PriceDigestClassifications
+        WHERE ClassificationName = @ClassificationName -- Replace with the value being inserted
+            AND ClassificationID = @ClassificationID -- Replace with the value being inserted
+);
+
+
+END
+
+GO
+
