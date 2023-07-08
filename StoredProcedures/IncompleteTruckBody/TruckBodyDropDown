@@ -1,0 +1,32 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/9/2023
+
+This sproc is being built in order to build the incomplete truck body buildout category drop-down.
+
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestTruckCategoryCombo
+--DECLARE
+    @ApplicationNum INT = 37369,
+	@SubscriberID INT = 2007
+AS
+BEGIN
+
+SELECT 
+    ManufacturerName AS ValueData,
+	ManufacturerName AS DisplayData
+FROM 
+    Sub2007.PriceDigestManufacturers
+WHERE ClassificationID = 8
+ORDER BY ManufacturerName
+
+END
+GO
+
