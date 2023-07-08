@@ -9,7 +9,8 @@ GO
 Sproc Author: A-A-Ron Drury
 Date: 6/16/2023
 
-This sproc is being built in order to delete the row from the valuation table that is unwanted.
+This sproc is being built in order to delete the row from the valuation table that is unwanted in the event a user
+changes their mind or made a mistake.
 */
 
 ALTER PROCEDURE sub2007.sPriceDigestDeleteValuation
