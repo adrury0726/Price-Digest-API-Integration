@@ -1,0 +1,130 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/15/2023
+
+This sproc is being built in order to display the major components options, as well as display what's selected by the user.
+
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestGetMajorComponents
+--DECLARE
+	@ApplicationNum INT = 37549,
+	@SubscriberID INT = 2007
+AS
+BEGIN
+
+DECLARE @AssetNum INT = (SELECT MAX(AssetNum) FROM Sub2007.PriceDigestVerificationAPIRequest WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID)
+
+DECLARE @EngineModel VARCHAR(50),
+		@DefaultEngine VARCHAR(50),
+		@Transmission VARCHAR(50),
+		@TransmissionMake VARCHAR(50),
+		@DefaultTransmission VARCHAR(50)
+
+
+	
+-----------------------------------------------------------------------------------------------------------
+-----Getting our default engine. This drives the value price of an asset and how we calculate it-----
+SELECT @EngineModel = SpecValue 
+FROM Sub2007.PriceDigestSpecDetails 
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+	  AND SpecFamily = 'Engine' AND SpecName = 'engineModel'
+
+SELECT @DefaultEngine = OptionName 
+FROM Sub2007.PriceDigestEngines 
+WHERE OptionName LIKE '%' + @EngineModel + '%'
+
+
+-----------------------------------------------------------------------------------------------------------
+-----Getting our default transmission. This drives the value price of an asset and how we calculate it-----
+SELECT @Transmission = SpecValue 
+FROM Sub2007.PriceDigestSpecDetails 
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+	  AND SpecFamily = 'Transmission' AND SpecName = 'transmission'
+
+SELECT @TransmissionMake = LEFT(SpecValue, 2) 
+FROM Sub2007.PriceDigestSpecDetails 
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+	  AND SpecFamily = 'Transmission' AND SpecName = 'transmissionMake'
+
+SELECT @DefaultTransmission = OptionName 
+FROM Sub2007.PriceDigestTransmissions
+WHERE OptionName = @TransmissionMake + ': ' + @Transmission
+
+
+--Adding this so it always inserts a null value that we can later update with the save sproc. Keeps the get from breaking.
+IF NOT EXISTS(SELECT 1 FROM Sub2007.PriceDigestMajorComponents WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID)
+BEGIN
+
+INSERT INTO Sub2007.PriceDigestMajorComponents
+    (
+        ApplicationNum,
+        SubscriberID,
+        Engine,
+        Transmission,
+        Mileage,
+		AssetNum
+    )
+VALUES
+    (
+        @ApplicationNum, -- ApplicationNum - int
+        @SubscriberID, -- SubscriberID - int
+        @DefaultEngine, -- Engine - varchar(100)
+        @DefaultTransmission, -- Transmission - varchar(100)
+        NULL,  -- Mileage - varchar(50)
+		@AssetNum -- AssetNum - int
+    )
+
+END
+
+
+DECLARE	@GetResultslblColor VARCHAR(100),
+		@ValuationConfigID INT,
+		@ResultsConfigID INT,
+		@TruckBodyConfigID INT
+
+SELECT @ValuationConfigID = ConfigurationID 
+FROM Sub2007.PriceDigestCurrentValuation
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+
+SELECT TOP 1 @ResultsConfigID = ConfigurationID FROM Sub2007.PriceDigestAdjustedResults
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+ORDER BY TransientKey DESC
+
+SELECT @TruckBodyConfigID =  ConfigurationID 
+FROM Sub2007.PriceDigestSelectedTruckBodyValues
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+
+
+IF @ValuationConfigID = @ResultsConfigID OR @TruckBodyConfigID = @ResultsConfigID
+BEGIN
+SET @GetResultslblColor = 'btn-default bg-success'
+END
+
+ELSE
+BEGIN
+SET @GetResultslblColor = 'btn-default bg-danger'
+END
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+SELECT mc.ApplicationNum,
+	   mc.SubscriberID,
+	   CASE WHEN @DefaultEngine IS NOT NULL AND mc.Engine IS NULL THEN @DefaultEngine ELSE mc.Engine END AS Engine,
+	   CASE WHEN @DefaultTransmission IS NOT NULL AND mc.Transmission IS NULL THEN @DefaultTransmission ELSE mc.Transmission END AS Transmission,
+	   mc.Mileage,
+	   mc.AssetNum,
+	   @GetResultslblColor AS FinalResultsLayout,
+	   mc.TransientKey
+FROM Sub2007.PriceDigestMajorComponents mc
+WHERE mc.ApplicationNum = @ApplicationNum AND mc.SubscriberID = @SubscriberID
+
+END
+GO
+
