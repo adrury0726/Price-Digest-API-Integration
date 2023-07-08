@@ -1,0 +1,15 @@
+--This table is meant to hold all incomplete truck body information when an API call is done for an asset.
+
+CREATE TABLE [Sub2007].[PriceDigestIncompleteTruckBodyBuild]
+(
+[ApplicationNum] [int] NULL,
+[SubscriberID] [int] NULL,
+[ConfigurationID] [int] NULL,
+[AssetNum] [int] NULL,
+[Category] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ModelYear] [varchar] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ModelName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1),
+[AssetSelection] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+) ON [PRIMARY]
+GO
