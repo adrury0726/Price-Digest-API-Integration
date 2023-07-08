@@ -1,0 +1,155 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 4/28/2023
+
+This sproc is being built in order to save information that's being retrieved from the GET API request for Verification. IE, the data retrieved when you 
+enter the VIN OR Year, Make, Model in the Price Digest screen.
+
+*/
+ALTER PROCEDURE sub2007.PriceDigestVerificationAPIRequestSave
+--DECLARE
+    @ApplicationNum INT,
+	@SubscriberID INT,
+	@AssetNum INT,
+	@ModelID INT,
+	@ModelName VARCHAR(30),
+	@ModelYear VARCHAR(4),
+	@ManufacturerID INT,
+	@ManufacturerName VARCHAR(50),
+	@ClassificationID INT,
+	@ClassificationName VARCHAR(50),
+	@CategoryID INT,
+	@CategoryName VARCHAR(50),
+	@SubtypeID INT,
+	@SubTypeName VARCHAR(50),
+	@SizeClassId INT,
+	@SizeClassName VARCHAR(50),
+	@SizeClassMin INT,
+	@SizeClassMax INT,
+	@SizeClassUom VARCHAR(10),
+	@ConfigurationID INT,
+	@VinModelNumber VARCHAR(50),
+	@VinManufacturerCode VARCHAR(50) = NULL,
+	@VinYearCode VARCHAR(50) = NULL,
+	@ManufacturerAlias VARCHAR(50),
+	@ModelAlias VARCHAR(50),
+	@CicCode VARCHAR(50) = NULL,
+	@ShortVin VARCHAR(50) = NULL,
+	@Brand VARCHAR(50) = NULL
+AS
+BEGIN
+
+
+--API Request
+INSERT INTO Sub2007.PriceDigestVerificationAPIRequest
+    (
+        ApplicationNum,
+        SubscriberID,
+        AssetNum,
+        ModelID,
+        ModelName,
+        ModelYear,
+        ManufacturerID,
+        ManufacturerName,
+        ClassificationID,
+        ClassificationName,
+        CategoryID,
+        CategoryName,
+        SubTypeID,
+        SubTypeName,
+        SizeClassID,
+        SizeClassName,
+        SizeClassMin,
+        SizeClassMax,
+        SizeClassUom,
+        ConfigurationID,
+        VinModelNumber,
+        VinManufacturerCode,
+        VinYearCode,
+        ShortVin,
+        CicCode,
+        Brand,
+		RequestDate
+    )
+VALUES
+    (
+        @ApplicationNum,    -- ApplicationNum - int
+        @SubscriberID,    -- SubscriberID - int
+        @AssetNum,    -- AssetNum - int	
+        @ModelID, -- ModelID - int
+        @ModelName, -- ModelName - varchar(50)
+        @ModelYear, -- ModelYear - varchar(4)
+        @ManufacturerID, -- ManufacturerID - int
+        @ManufacturerName, -- ManufacturerName - varchar(50)
+        @ClassificationID, -- ClassificationID - int
+        @ClassificationName, -- ClassificationName - varchar(50)
+        @CategoryID, -- CategoryID - int
+        @CategoryName, -- CategoryName - varchar(50)
+        @SubtypeID, -- SubTypeID - int
+        @SubTypeName, -- SubTypeName - varchar(50)
+        @SizeClassId, -- SizeClassID - int
+        @SizeClassName, -- SizeClassName - varchar(50)
+        @SizeClassMin, -- SizeClassMin - int
+        @SizeClassMax, -- SizeClassMax - int
+        @SizeClassUom, -- SizeClassUom - varchar(50)
+        @ConfigurationID, -- ConfigurationID - int
+        @VinModelNumber, -- VinModelNumber - varchar(20)
+        @VinManufacturerCode, -- VinManufacturerCode - varchar(50)
+        @VinYearCode, -- VinYearCode - varchar(50)
+        @ShortVin, -- ShortVin - varchar(50)
+        @CicCode, -- CicCode - varchar(50)
+        @Brand,  -- Brand - varchar(50)
+		GETDATE() -- RequestDate - DateTime
+    )
+ 
+    
+--Model Aliases from Verification API request
+INSERT INTO Sub2007.PriceDigestModelAliases
+    (
+        SubscriberID,
+        ApplicationNum,
+        AssetNum,
+        ModelId,
+        Alias,
+		RequestDate
+    )
+VALUES
+    (
+        @SubscriberID,    -- SubscriberID - int
+        @ApplicationNum,    -- ApplicationNum - int
+        @AssetNum,    -- AssetNum - int	
+        @ModelID, -- ModelId - int
+        @ModelAlias,  -- Alias - varchar(50)
+		GETDATE() -- RequestDate - DateTime
+    )
+
+--Manufacturer Alias from Verification API Request
+INSERT INTO Sub2007.PriceDigestManufacturerAliases
+    (
+        SubscriberID,
+        ApplicationNum,
+        AssetNum,
+        ManufacturerId,
+        Alias,
+		RequestDate
+    )
+VALUES
+    (
+        @SubscriberID,    -- SubscriberID - int
+        @ApplicationNum,    -- ApplicationNum - int
+        @AssetNum,   -- AssetNum - int	   
+        @ManufacturerID, -- ManufacturerId - int
+        @ManufacturerAlias,  -- Alias - varchar(50)
+		GETDATE() -- RequestDate - DateTime
+    )
+
+END
+
+GO
+
