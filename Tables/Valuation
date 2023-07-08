@@ -1,0 +1,42 @@
+
+--Prices from the selected asset
+CREATE TABLE [Sub2007].[PriceDigestCurrentValuation]
+(
+[ApplicationNum] [int] NULL,
+[SubscriberID] [int] NULL,
+[AssetNum] [int] NULL,
+[ModelID] [int] NULL,
+[ManufacturerID] [int] NULL,
+[ManufacturerName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ModelYear] [varchar] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ConfigurationID] [int] NULL,
+[MSRP] [int] NULL,
+[UnadjustedFinance] [int] NULL,
+[UnadjustedRetail] [int] NULL,
+[UnadjustedWholeSale] [int] NULL,
+[UnadjustedTradeIn] [int] NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1),
+[AssetFullName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+) ON [PRIMARY]
+GO
+
+--History of all selected assets chosen by all users
+CREATE TABLE [Sub2007].[PriceDigestValuationHistory]
+(
+[ApplicationNum] [int] NULL,
+[SubscriberID] [int] NULL,
+[AssetNum] [int] NULL,
+[ModelID] [int] NULL,
+[ManufacturerID] [int] NULL,
+[ManufacturerName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ModelYear] [varchar] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ConfigurationID] [int] NULL,
+[MSRP] [int] NULL,
+[UnadjustedFinance] [int] NULL,
+[UnadjustedRetail] [int] NULL,
+[UnadjustedWholeSale] [int] NULL,
+[UnadjustedTradeIn] [int] NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1),
+[AssetFullName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+) ON [PRIMARY]
+GO
