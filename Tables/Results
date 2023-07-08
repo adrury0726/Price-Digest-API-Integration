@@ -1,0 +1,50 @@
+--Final adjusted prices for selected assets
+CREATE TABLE [Sub2007].[PriceDigestAdjustedResults]
+(
+[ApplicationNum] [int] NULL,
+[SubscriberID] [int] NULL,
+[AssetNum] [int] NULL,
+[ModelID] [int] NULL,
+[ManufacturerID] [int] NULL,
+[ManufacturerName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ModelYear] [varchar] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ConfigurationID] [int] NULL,
+[MSRP] [int] NULL,
+[AdjustedFinance] [int] NULL,
+[AdjustedWholeSale] [int] NULL,
+[AdjustedRetail] [int] NULL,
+[AdjustedTradeIn] [int] NULL,
+[Mileage] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[NumofAsset] [int] NULL,
+[AssetFullName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TotalPrice] [int] NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1)
+) ON [PRIMARY]
+GO
+
+--Final adjusted prices for the incomplete truck body
+CREATE TABLE [Sub2007].[PriceDigestIncompleteTruckBodyValuation]
+(
+[ApplicationNum] [int] NULL,
+[SubscriberID] [int] NULL,
+[AssetNum] [int] NULL,
+[modelId] [int] NULL,
+[modelName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[manufacturerId] [int] NULL,
+[manufacturerName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[classificationId] [int] NULL,
+[classificationName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[categoryId] [int] NULL,
+[categoryName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[sizeClassId] [int] NULL,
+[SizeClassName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[modelYear] [varchar] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[configurationId] [int] NULL,
+[MSRP] [int] NULL,
+[unadjustedFinance] [int] NULL,
+[unadjustedRetail] [int] NULL,
+[unadjustedWholesale] [int] NULL,
+[unadjustedTradeIn] [int] NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1)
+) ON [PRIMARY]
+GO
