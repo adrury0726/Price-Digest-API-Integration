@@ -1,0 +1,41 @@
+
+--Get the engine list for the assets
+CREATE TABLE [Sub2007].[PriceDigestEngines]
+(
+[SizeClassID] [int] NULL,
+[ModelYear] [varchar] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[OptionFamilyID] [int] NULL,
+[OptionFamilyName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[OptionName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[OptionValue] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[OptionMSRP] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1)
+) ON [PRIMARY]
+GO
+
+--Get the transmission list for the assets
+CREATE TABLE [Sub2007].[PriceDigestTransmissions]
+(
+[SizeClassID] [int] NULL,
+[ModelYear] [varchar] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[OptionFamilyID] [int] NULL,
+[OptionFamilyName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[OptionName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[OptionValue] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[OptionMSRP] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1)
+) ON [PRIMARY]
+GO
+
+--Display the selected engine/transmissions/mileage entered by the user
+CREATE TABLE [Sub2007].[PriceDigestMajorComponents]
+(
+[ApplicationNum] [int] NULL,
+[SubscriberID] [int] NULL,
+[Engine] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[Transmission] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[Mileage] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1),
+[AssetNum] [int] NULL
+) ON [PRIMARY]
+GO
