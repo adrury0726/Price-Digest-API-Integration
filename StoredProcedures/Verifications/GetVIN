@@ -1,0 +1,97 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 4/28/2023
+
+This sproc is being built in order to get the information that was selected by the user. The GetDigest button is what sends the API Call.
+
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestGetVIN
+--DECLARE
+    @ApplicationNum INT = 37369,
+	@SubscriberID INT = 2007
+AS
+BEGIN
+
+---Adding this due to form issues with data not showing when it's a new app.
+IF NOT EXISTS (
+    SELECT 1
+    FROM Sub2007.PriceDigestVINYearMakeModel
+    WHERE ApplicationNum = @ApplicationNum
+      AND SubscriberID = @SubscriberID
+)
+BEGIN
+INSERT INTO Sub2007.PriceDigestVINYearMakeModel
+    (
+        SubscriberID,
+        ApplicationNum,
+        AssetNum,
+        VinNum,
+        VehicleCategory,
+        VehicleYear,
+        VehicleMake,
+        VehicleModel,
+        PriceDigestOverride,
+        RequestDate,
+        ClassificationID,
+        ManufacturerID,
+		LockFields
+    )
+VALUES
+    (
+        @SubscriberID, -- SubscriberID - int
+        @ApplicationNum, -- ApplicationNum - int
+        0,    -- AssetNum - int
+        NULL, -- VinNum - varchar(50)
+        NULL, -- VehicleCategory - varchar(50)
+        NULL, -- VehicleYear - varchar(4)
+        NULL, -- VehicleMake - varchar(50)
+        NULL, -- VehicleModel - varchar(50)
+        NULL, -- PriceDigestOverride - tinyint
+        NULL, -- RequestDate - datetime
+        NULL, -- ClassificationID - int
+        NULL,  -- ManufacturerID - int
+		NULL -- LockFields - tinyint
+    )
+
+END
+
+DECLARE @VehicleCategory VARCHAR(100) =
+(SELECT TOP 1 VehicleCategory FROM Sub2007.PriceDigestVINYearMakeModel WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID ORDER BY TransientKey DESC)
+
+IF @VehicleCategory IS NOT NULL
+BEGIN
+UPDATE Sub2007.PriceDigestVINYearMakeModel
+SET VinNum = NULL
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+END
+
+SELECT TOP 1
+	   ApplicationNum,
+	   SubscriberID, 
+	   AssetNum,
+	   VinNum,
+	   VehicleCategory,
+	   VehicleYear,
+	   VehicleMake,
+	   VehicleModel,
+	   PriceDigestOverride,
+	   RequestDate,
+	   ClassificationID,
+	   ManufacturerID,
+	   PriceDigestOverride,
+	   LockFields AS LockVIN,
+	   TransientKey
+FROM Sub2007.PriceDigestVINYearMakeModel 
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+ORDER BY RequestDate DESC 
+
+END
+GO
+
