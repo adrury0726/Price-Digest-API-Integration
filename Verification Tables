@@ -1,0 +1,82 @@
+--For my verification tables, these are how I created them in SQL Server.
+
+--Model Aliases. We need this table, as the API call returns a list of aliases per asset, so creating table to handle the list is how we can handle this.
+CREATE TABLE [Sub2007].[PriceDigestModelAliases]
+(
+[SubscriberID] [int] NOT NULL,
+[ApplicationNum] [int] NOT NULL,
+[AssetNum] [int] NOT NULL,
+[ModelId] [int] NULL,
+[Alias] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1),
+[RequestDate] [datetime] NULL
+) ON [PRIMARY]
+GO
+
+
+--ManufacturerAliases. We need this table, as the API call returns a list of aliases per asset, so creating table to handle the list is how we can handle this.
+CREATE TABLE [Sub2007].[PriceDigestManufacturerAliases]
+(
+[SubscriberID] [int] NOT NULL,
+[ApplicationNum] [int] NOT NULL,
+[AssetNum] [int] NOT NULL,
+[ManufacturerId] [int] NULL,
+[Alias] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1),
+[RequestDate] [datetime] NULL
+) ON [PRIMARY]
+GO
+
+--This is the bulk request we're getting back for each asset in Price Digest.
+CREATE TABLE [Sub2007].[PriceDigestVerificationAPIRequest]
+(
+[ApplicationNum] [int] NOT NULL,
+[SubscriberID] [int] NOT NULL,
+[AssetNum] [int] NOT NULL,
+[ModelID] [int] NULL,
+[ModelName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ModelYear] [varchar] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ManufacturerID] [int] NULL,
+[ManufacturerName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ClassificationID] [int] NULL,
+[ClassificationName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CategoryID] [int] NULL,
+[CategoryName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SubTypeID] [int] NULL,
+[SubTypeName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SizeClassID] [int] NULL,
+[SizeClassName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SizeClassMin] [int] NULL,
+[SizeClassMax] [int] NULL,
+[SizeClassUom] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ConfigurationID] [int] NULL,
+[VinModelNumber] [varchar] (20) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[VinManufacturerCode] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[VinYearCode] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ShortVin] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CicCode] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[Brand] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1),
+[RequestDate] [datetime] NULL
+) ON [PRIMARY]
+GO
+
+--This is the table I used on our website in order to get the data and display it for the user.
+CREATE TABLE [Sub2007].[PriceDigestVINYearMakeModel]
+(
+[SubscriberID] [int] NULL,
+[ApplicationNum] [int] NULL,
+[AssetNum] [int] NOT NULL,
+[VinNum] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[VehicleCategory] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[VehicleYear] [varchar] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[VehicleMake] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[VehicleModel] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[PriceDigestOverride] [tinyint] NULL,
+[RequestDate] [datetime] NULL,
+[ClassificationID] [int] NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1),
+[ManufacturerID] [int] NULL,
+[LockFields] [tinyint] NULL
+) ON [PRIMARY]
+GO
