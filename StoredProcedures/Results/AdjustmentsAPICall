@@ -1,0 +1,109 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/16/2023
+
+This sproc is being built in order to insert into the current valuations after the adjustments have been made.
+
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestValuationAdjustmentsAPICall
+--DECLARE
+	@ApplicationNum INT,
+	@SubscriberID INT,
+	@AssetNum INT,
+	@ConfigurationID INT,
+	@ModelID INT,
+	@ManufacturerID INT,
+	@ManufacturerName VARCHAR(100),
+	@ModelYear VARCHAR(4),
+	@MSRP VARCHAR(100),
+	@AdjustedFinance INT,
+	@AdjustedRetail INT,
+	@AdjustedWholeSale INT,
+	@AdjustedTradeIn INT
+
+AS
+BEGIN
+
+DECLARE @Mileage VARCHAR(50) = (SELECT TOP 1 Mileage FROM Sub2007.PriceDigestMajorComponents WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID ORDER BY TransientKey DESC)
+
+
+DECLARE @max_assetnum INT;
+SELECT @max_assetnum = (SELECT MAX(AssetNum) FROM Sub2007.PriceDigestMajorComponents WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID)
+
+DECLARE @AssetFullName VARCHAR(100) = 
+(SELECT TOP 1 AssetFullName FROM Sub2007.PriceDigestCurrentValuation WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID ORDER BY TransientKey DESC)
+
+
+	-- Check if the AssetFullName already exists for the given ApplicationNum
+IF EXISTS (
+		SELECT 1
+		FROM Sub2007.PriceDigestAdjustedResults
+		WHERE ApplicationNum = @ApplicationNum
+			AND SubscriberID = @SubscriberID
+			AND AssetFullName = @AssetFullName
+		  )
+BEGIN
+UPDATE Sub2007.PriceDigestAdjustedResults
+SET MSRP = @MSRP,
+	AdjustedFinance = @AdjustedFinance,
+	AdjustedRetail = @AdjustedRetail,
+	AdjustedWholeSale = @AdjustedWholeSale,
+	AdjustedTradeIn = @AdjustedTradeIn,
+	TotalPrice = NULL
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID AND AssetFullName = @AssetFullName
+END
+
+
+--If the AssetFullName doesn't already exist, then do an insert
+ELSE
+BEGIN
+
+INSERT INTO Sub2007.PriceDigestAdjustedResults
+    (
+        ApplicationNum,
+        SubscriberID,
+        AssetNum,
+        ModelID,
+        ManufacturerID,
+        ManufacturerName,
+        ModelYear,
+        ConfigurationID,
+        MSRP,
+        AdjustedFinance,
+        AdjustedWholeSale,
+        AdjustedRetail,
+        AdjustedTradeIn,
+		Mileage,
+		AssetFullName
+    )
+VALUES
+    (
+        @ApplicationNum, -- ApplicationNum - int
+        @SubscriberID, -- SubscriberID - int
+        @max_assetnum, -- AssetNum - int
+        @ModelID, -- ModelID - int
+        @ManufacturerID, -- ManufacturerID - int
+        @ManufacturerName, -- ManufacturerName - varchar(100)
+        @ModelYear, -- ModelYear - varchar(4)
+        @ConfigurationID, -- ConfigurationID - int
+        @MSRP, -- MSRP - varchar(100)
+        @AdjustedFinance, -- AdjustedFinance - int
+        @AdjustedWholeSale, -- AdjustedWholeSale - int
+        @AdjustedRetail, -- AdjustedRetail - int
+        @AdjustedTradeIn,  -- AdjustedTradeIn - int
+		@Mileage, -- Mileage - Varchar(50)
+		@AssetFullName -- AssetFullName - varchar(100)
+    )
+END
+
+END
+
+GO
+
