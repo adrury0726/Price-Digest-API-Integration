@@ -1,0 +1,49 @@
+--Where we'll be inserting the data into with our API Call
+CREATE TABLE [Sub2007].[PriceDigestIncompleteTruckSpecs]
+(
+[ApplicationNum] [int] NULL,
+[SubscriberID] [int] NULL,
+[TruckBodyAssetNum] [int] NULL,
+[AssetNum] [int] NULL,
+[ConfigurationId] [int] NULL,
+[SpecName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SpecValue] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SpecNameFriendly] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SpecUom] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SpecDescription] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SpecFamily] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1),
+[SubmitDate] [datetime] NULL,
+[Active] [tinyint] NULL
+) ON [PRIMARY]
+GO
+
+
+
+
+--Where values for the selected truck from our Valuation API Call will be stored
+CREATE TABLE [Sub2007].[PriceDigestIncompleteTruckBodyValuation]
+(
+[ApplicationNum] [int] NULL,
+[SubscriberID] [int] NULL,
+[AssetNum] [int] NULL,
+[modelId] [int] NULL,
+[modelName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[manufacturerId] [int] NULL,
+[manufacturerName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[classificationId] [int] NULL,
+[classificationName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[categoryId] [int] NULL,
+[categoryName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[sizeClassId] [int] NULL,
+[SizeClassName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[modelYear] [varchar] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[configurationId] [int] NULL,
+[MSRP] [int] NULL,
+[unadjustedFinance] [int] NULL,
+[unadjustedRetail] [int] NULL,
+[unadjustedWholesale] [int] NULL,
+[unadjustedTradeIn] [int] NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1)
+) ON [PRIMARY]
+GO
