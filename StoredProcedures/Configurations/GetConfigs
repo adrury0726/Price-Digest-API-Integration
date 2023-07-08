@@ -1,0 +1,46 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 4/28/2023
+
+This sproc is being built in order to get the information that was selected by the user. The GetDigest button is what sends the API Call.
+
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestGetConfigurations
+--DECLARE
+    @ApplicationNum INT = 37369,
+	@SubscriberID INT = 2007
+AS
+BEGIN
+
+SELECT TOP 1 sub.ApplicationNum,
+       sub.SubscriberID,
+       sub.ConfigOptions,
+       sub.ConfigurationID,
+	   sub.AssetNum,
+	   sub.ModelName,
+       sub.TransientKey
+FROM (
+    SELECT ApplicationNum,
+           SubscriberID,
+           ConfigOptions,
+           ConfigurationID,
+		   AssetNum,
+		   ModelName,
+           TransientKey,
+           ROW_NUMBER() OVER (PARTITION BY ConfigurationID ORDER BY ConfigurationID) AS rn --We only want to select distinct ConfigurationID's. This is accomplished using the Row_Number()
+    FROM Sub2007.PriceDigestConfigOptionsList
+    WHERE ApplicationNum = @ApplicationNum
+      AND SubscriberID = @SubscriberID
+) AS sub
+WHERE rn = 1
+    
+END
+GO
+
