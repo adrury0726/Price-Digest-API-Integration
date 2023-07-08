@@ -1,0 +1,42 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/6/2023
+
+This sproc is being built in order to display the configuration options that the user can select from.
+
+This sproc was a little more difficult, as there are some limitations to the website platform we use,
+which made it difficult to display the data properly on our website. I made it so that it would display the Specvalues
+as a red font and got it to list out per configurationID (unique identifier).
+*/
+
+ALTER PROCEDURE  sub2007.sPriceDigestGetConfigList
+--DECLARE
+    @ApplicationNum INT = 37369,
+	@SubscriberID INT = 2007
+AS
+BEGIN
+   
+	SELECT TOP 10
+    p1.ConfigurationID AS ConfigurationID, 
+    STUFF(
+        (
+            SELECT CHAR(13) + CHAR(10) + ('<Font color=''red''>' +'&nbsp' + SpecName + ': ' + '</Font>' + SpecValue)+'<br>  '
+            FROM Sub2007.PriceDigestCurrentSpecs p2
+            WHERE p1.ConfigurationID = p2.ConfigurationID
+            FOR XML PATH(''), TYPE
+        ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') AS Value1, 
+    ROW_NUMBER() OVER (ORDER BY ConfigurationID) AS 'TransientKey'
+FROM Sub2007.PriceDigestCurrentSpecs p1
+WHERE p1.ApplicationNum = @ApplicationNum AND p1.SubscriberID = @SubscriberID
+GROUP BY p1.ConfigurationID;
+
+
+END
+GO
+
