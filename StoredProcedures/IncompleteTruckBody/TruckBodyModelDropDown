@@ -1,0 +1,33 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/9/2023
+
+This sproc is being built in order to build the incomplete truck body buildout model drop-down.
+
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestTruckBodyModelCombo
+--DECLARE
+    @ApplicationNum INT = 37369,
+	@SubscriberID INT = 2007
+AS
+BEGIN
+
+SELECT 
+    m.ModelName AS ValueData,
+	m.ModelName AS DisplayData
+FROM Sub2007.PriceDigestModels m
+LEFT JOIN Sub2007.PriceDigestIncompleteTruckBodyBuild tbb ON tbb.Category = m.ManufacturerName
+WHERE ClassificationID = 8 AND tbb.Category = m.ManufacturerName 
+	  AND tbb.ApplicationNum = @ApplicationNum AND tbb.SubscriberID = @SubscriberID
+ORDER BY ManufacturerName
+
+END
+GO
+
