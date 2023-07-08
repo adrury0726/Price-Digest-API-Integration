@@ -1,0 +1,116 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/16/2023
+
+This sproc is being built in order to insert into the current valuations prior to the adjustments being made.
+
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestValuationAPICall
+--DECLARE
+	@ApplicationNum INT,
+	@SubscriberID INT,
+	@AssetNum INT,
+	@ConfigurationID INT,
+	@ModelID INT,
+	@ManufacturerID INT,
+	@ManufacturerName VARCHAR(100),
+	@ModelYear VARCHAR(4),
+	@MSRP VARCHAR(100),
+	@UnadjustedFinance INT,
+	@UnadjustedRetail INT,
+	@UnadjustedWholesale INT,
+	@UnadjustedTradeIn INT
+
+AS
+BEGIN
+
+DECLARE @max_assetnum INT;
+SELECT @max_assetnum = (SELECT MAX(AssetNum) FROM Sub2007.PriceDigestVINYearMakeModel WHERE SubscriberID=@SubscriberID AND ApplicationNum=@ApplicationNum)
+
+DECLARE @AssetFullName VARCHAR(100) =
+(SELECT TOP 1 ModelYear + ' ' + ManufacturerName + ' ' + ModelName 
+FROM Sub2007.PriceDigestConfigOptionsList
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID AND Active = 1)
+
+
+INSERT INTO Sub2007.PriceDigestCurrentValuation
+    (
+        ApplicationNum,
+        SubscriberID,
+        AssetNum,
+        ModelID,
+        ManufacturerID,
+        ManufacturerName,
+        ModelYear,
+        ConfigurationID,
+        MSRP,
+        UnadjustedFinance,
+        UnadjustedRetail,
+        UnadjustedWholeSale,
+        UnadjustedTradeIn,
+		AssetFullName
+    )
+VALUES
+    (
+        @ApplicationNum, -- ApplicationNum - int
+        @SubscriberID, -- SubscriberID - int
+        COALESCE(@max_assetnum + 1, 1), -- AssetNum - int
+        @ModelID, -- ModelID - int
+        @ManufacturerID, -- ManufacturerID - int
+        @ManufacturerName, -- ManufacturerName - varchar(100)
+        @ModelYear, -- ModelYear - varchar(4)
+        @ConfigurationID, -- ConfigurationID - int
+        @MSRP, -- MSRP - varchar(100)
+        @UnadjustedFinance, -- UnadjustedFinance - int
+        @UnadjustedRetail, -- UnadjustedRetail - int
+        @UnadjustedWholesale, -- UnadjustedWholeSale - int
+        @UnadjustedTradeIn, -- UnadjustedTradeIn - int
+		@AssetFullName -- AssetFullName - varchar(100)
+    )
+
+INSERT INTO Sub2007.PriceDigestValuationHistory
+    (
+        ApplicationNum,
+        SubscriberID,
+        AssetNum,
+        ModelID,
+        ManufacturerID,
+        ManufacturerName,
+        ModelYear,
+        ConfigurationID,
+        MSRP,
+        UnadjustedFinance,
+        UnadjustedRetail,
+        UnadjustedWholeSale,
+        UnadjustedTradeIn,
+		AssetFullName
+    )
+VALUES
+    (
+        @ApplicationNum, -- ApplicationNum - int
+        @SubscriberID, -- SubscriberID - int
+        COALESCE(@max_assetnum + 1, 1), -- AssetNum - int
+        @ModelID, -- ModelID - int
+        @ManufacturerID, -- ManufacturerID - int
+        @ManufacturerName, -- ManufacturerName - varchar(100)
+        @ModelYear, -- ModelYear - varchar(4)
+        @ConfigurationID, -- ConfigurationID - int
+        @MSRP, -- MSRP - varchar(100)
+        @UnadjustedFinance, -- UnadjustedFinance - int
+        @UnadjustedRetail, -- UnadjustedRetail - int
+        @UnadjustedWholesale, -- UnadjustedWholeSale - int
+        @UnadjustedTradeIn, -- UnadjustedTradeIn - int
+		@AssetFullName -- AssetFullName - varchar(100)
+    )
+
+END
+
+GO
+
