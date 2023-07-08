@@ -1,0 +1,267 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/20/2023
+
+This sproc is being built in order to do the calculations in the results form whenever the Final Results button is clicked in Price Digest.
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestCalcValues
+--DECLARE
+    @ApplicationNum INT = 37369,
+	@SubscriberID INT = 2007
+AS
+BEGIN
+
+DECLARE @AssetNum INT = (SELECT MAX(AssetNum) FROM Sub2007.PriceDigestMajorComponents WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID)
+
+
+--Getting the default options so we can calculate correctly
+DECLARE @EngineModel VARCHAR(50),
+		@DefaultEngine VARCHAR(50),
+		@Transmission VARCHAR(50),
+		@TransmissionMake VARCHAR(50),
+		@DefaultTransmission VARCHAR(50)
+
+-----------------------------------------------------------------------------------------------------------
+-----Getting our default engine. This drives the value price of an asset and how we calculate it-----
+SELECT @EngineModel = SpecValue 
+FROM Sub2007.PriceDigestSpecDetails 
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+	  AND SpecFamily = 'Engine' AND SpecName = 'engineModel'
+
+SELECT @DefaultEngine = OptionName 
+FROM Sub2007.PriceDigestEngines 
+WHERE OptionName LIKE '%' + @EngineModel + '%'
+
+-----------------------------------------------------------------------------------------------------------
+-----Getting our default transmission. This drives the value price of an asset and how we calculate it-----
+SELECT @Transmission = SpecValue 
+FROM Sub2007.PriceDigestSpecDetails 
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+	  AND SpecFamily = 'Transmission' AND SpecName = 'transmission'
+
+SELECT @TransmissionMake = LEFT(SpecValue, 2) 
+FROM Sub2007.PriceDigestSpecDetails 
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+	  AND SpecFamily = 'Transmission' AND SpecName = 'transmissionMake'
+
+SELECT @DefaultTransmission = OptionName 
+FROM Sub2007.PriceDigestTransmissions
+WHERE OptionName = @TransmissionMake + ': ' + @Transmission
+
+---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+DECLARE @SelectedEngine VARCHAR(50),
+		@SelectedTransmission VARCHAR(50)
+
+--Getting the engine that was selected in the drop-down.
+SELECT @SelectedEngine = Engine,
+	   @SelectedTransmission = Transmission
+FROM Sub2007.PriceDigestMajorComponents 
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID AND AssetNum = @AssetNum
+
+
+---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+DECLARE @DefaultEngineMSRP INT,
+		@DefaultEngineRetailPrice INT,
+		@DefaultTransmissionMSRP INT,
+		@DefaultTransmissionRetailPrice INT,
+		@SelectedEngineMSRP INT,
+		@SelectedEngineRetailPrice INT,
+		@SelectedTransmissionMSRP INT,
+		@SelectedTransmissionRetailPrice INT
+
+--Assign default engine/transmission value variables
+SELECT @DefaultEngineMSRP = OptionMSRP,
+	   @DefaultEngineRetailPrice = OptionValue
+FROM Sub2007.PriceDigestEngines
+WHERE OptionName = @DefaultEngine
+
+SELECT @DefaultTransmissionMSRP = OptionMSRP,
+	   @DefaultTransmissionRetailPrice = OptionValue
+FROM Sub2007.PriceDigestTransmissions
+WHERE OptionName = @DefaultTransmission
+
+--Assign selected engine/transmission value variables
+SELECT @SelectedEngineMSRP = OptionMSRP,
+	   @SelectedEngineRetailPrice = OptionValue
+FROM Sub2007.PriceDigestEngines
+WHERE OptionName = @SelectedEngine
+
+SELECT @SelectedTransmissionMSRP = OptionMSRP,
+	   @SelectedTransmissionRetailPrice = OptionValue
+FROM Sub2007.PriceDigestTransmissions
+WHERE OptionName = @SelectedTransmission
+
+---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+--Calculations for if only a different engine is selected
+IF @DefaultEngine <> @SelectedEngine AND @DefaultTransmission = @SelectedTransmission
+BEGIN
+UPDATE Sub2007.PriceDigestAdjustedResults
+SET AdjustedRetail = CASE
+    WHEN @DefaultEngine < @SelectedEngine THEN ar.AdjustedRetail + (@SelectedEngineRetailPrice - @DefaultEngineRetailPrice)
+    WHEN @DefaultEngine > @SelectedEngine THEN ar.adjustedRetail - (@DefaultEngineRetailPrice - @SelectedEngineRetailPrice)
+    ELSE AdjustedRetail -- No change if the engines are equal
+					 END, --end case statement
+    MSRP = CASE
+    WHEN @DefaultEngine < @SelectedEngine THEN ar.MSRP + (@SelectedEngineMSRP - @DefaultEngineMSRP)
+    WHEN @DefaultEngine > @SelectedEngine THEN ar.MSRP - (@DefaultEngineMSRP - @SelectedEngineMSRP)
+    ELSE ar.MSRP -- No change if the engines are equal
+           END --end case statement
+FROM Sub2007.PriceDigestAdjustedResults ar 
+LEFT JOIN Sub2007.PriceDigestCurrentValuation cv ON cv.ApplicationNum = ar.ApplicationNum
+    WHERE ar.ApplicationNum = @ApplicationNum AND ar.SubscriberID = @SubscriberID AND ar.AssetNum = @AssetNum
+END
+---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+--Calcuation for if only a different transmission is selected
+IF @DefaultTransmission <> @SelectedTransmission AND @DefaultEngine = @SelectedEngine
+BEGIN
+UPDATE Sub2007.PriceDigestAdjustedResults
+SET AdjustedRetail = CASE
+    WHEN @DefaultTransmission < @SelectedTransmission THEN ar.AdjustedRetail + (@SelectedTransmissionRetailPrice - @DefaultTransmissionRetailPrice)
+    WHEN @DefaultTransmission > @SelectedTransmission THEN ar.AdjustedRetail - (@DefaultTransmissionRetailPrice - @SelectedTransmissionRetailPrice)
+    ELSE ar.AdjustedRetail -- No change if the engines are equal
+					 END, --end case statement
+    MSRP = CASE
+    WHEN @DefaultTransmission < @SelectedTransmission THEN ar.MSRP + (@SelectedTransmissionMSRP - @DefaultTransmissionMSRP)
+    WHEN @DefaultTransmission > @SelectedTransmission THEN ar.MSRP - (@DefaultTransmissionMSRP - @SelectedTransmissionMSRP)
+    ELSE ar.MSRP -- No change if the engines are equal
+           END --end case statement
+FROM Sub2007.PriceDigestAdjustedResults ar 
+LEFT JOIN Sub2007.PriceDigestCurrentValuation cv ON cv.ApplicationNum = ar.ApplicationNum
+    WHERE ar.ApplicationNum = @ApplicationNum AND ar.SubscriberID = @SubscriberID AND ar.AssetNum = @AssetNum
+END
+
+---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+--Calcuation for if both a different transmission and different engine are selected
+IF @DefaultTransmission <> @SelectedTransmission AND @DefaultEngine <> @SelectedEngine
+BEGIN
+UPDATE Sub2007.PriceDigestAdjustedResults
+SET AdjustedRetail = CASE
+    WHEN @DefaultTransmission < @SelectedTransmission AND @DefaultEngine < @SelectedEngine 
+	THEN ar.AdjustedRetail + (@SelectedTransmissionRetailPrice - @DefaultTransmissionRetailPrice) + (@SelectedEngineRetailPrice - @DefaultEngineRetailPrice)
+
+    WHEN @DefaultTransmission > @SelectedTransmission AND @DefaultEngine > @SelectedEngine 
+	THEN ar.AdjustedRetail - (@DefaultTransmissionRetailPrice - @SelectedTransmissionRetailPrice) - (@DefaultEngineRetailPrice - @SelectedEngineRetailPrice)
+
+	WHEN @DefaultTransmission > @SelectedTransmission AND @DefaultEngine < @SelectedEngine 
+	THEN ar.AdjustedRetail - (@DefaultTransmissionRetailPrice - @SelectedTransmissionRetailPrice) + (@SelectedEngineRetailPrice - @DefaultEngineRetailPrice)
+
+    WHEN @DefaultTransmission < @SelectedTransmission AND @DefaultEngine > @SelectedEngine 
+	THEN ar.AdjustedRetail + (@SelectedTransmissionRetailPrice - @DefaultTransmissionRetailPrice) - (@DefaultEngineRetailPrice - @SelectedEngineRetailPrice)
+
+    ELSE ar.AdjustedRetail -- No change if the engines are equal
+					 END, --end case statement
+
+    MSRP = CASE
+    WHEN @DefaultTransmission < @SelectedTransmission AND @DefaultEngine < @SelectedEngine 
+	THEN ar.MSRP + (@SelectedTransmissionMSRP - @DefaultTransmissionMSRP) + (@SelectedEngineMSRP - @DefaultEngineMSRP)
+
+    WHEN @DefaultTransmission > @SelectedTransmission AND @DefaultEngine > @SelectedEngine
+	THEN ar.MSRP - (@DefaultTransmissionMSRP - @SelectedTransmissionMSRP) - (@DefaultEngineMSRP - @SelectedEngineMSRP)
+
+	WHEN @DefaultTransmission > @SelectedTransmission AND @DefaultEngine < @SelectedEngine 
+	THEN ar.MSRP - (@DefaultTransmissionMSRP - @SelectedTransmissionMSRP) + (@SelectedEngineMSRP - @DefaultEngineMSRP)
+
+    WHEN @DefaultTransmission < @SelectedTransmission AND @DefaultEngine > @SelectedEngine 
+	THEN ar.MSRP + (@SelectedTransmissionMSRP - @DefaultTransmissionMSRP) - (@DefaultEngineMSRP - @SelectedEngineMSRP)
+
+    ELSE ar.MSRP -- No change if the engines are equal
+           END --end case statement
+FROM Sub2007.PriceDigestAdjustedResults ar 
+LEFT JOIN Sub2007.PriceDigestCurrentValuation cv ON cv.ApplicationNum = ar.ApplicationNum
+    WHERE ar.ApplicationNum = @ApplicationNum AND ar.SubscriberID = @SubscriberID AND ar.AssetNum = @AssetNum
+END
+
+----Lock VIN Fields so user has to push the New Asset button
+UPDATE Sub2007.PriceDigestVINYearMakeModel
+SET LockFields = 1
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+
+----------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------
+--If there's an incomplete truck and it already exists in our current valuation, just update it. Don't reinsert it.
+--This can happen if the user is just making updates to a seperate asset and this would just keep unwanted inserts from occurring.
+-- Check if the ModelDescription exists in the ManufacturerName column
+IF EXISTS (
+    SELECT 1
+    FROM Sub2007.PriceDigestAdjustedResults
+    WHERE ManufacturerName IN (
+        SELECT ModelDescription
+        FROM Sub2007.PriceDigestSelectedTruckBodyValues
+        WHERE ApplicationNum = @ApplicationNum
+          AND SubscriberID = @SubscriberID
+    )
+)
+BEGIN
+    -- Update the existing records
+    UPDATE ar
+    SET ar.MSRP = S.MSRP,
+        ar.AdjustedRetail = S.RetailPrice,
+		ar.TotalPrice = NULL
+    FROM Sub2007.PriceDigestAdjustedResults ar
+    JOIN Sub2007.PriceDigestSelectedTruckBodyValues S ON ar.ManufacturerName = S.ModelDescription
+    WHERE ar.ApplicationNum = @ApplicationNum
+      AND ar.SubscriberID = @SubscriberID
+END
+
+ELSE
+BEGIN
+----Inserting the incomplete truck bodies that were selected into the results table.
+IF EXISTS(SELECT 1 FROM Sub2007.PriceDigestSelectedTruckBodyValues WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID)
+BEGIN
+
+INSERT INTO Sub2007.PriceDigestAdjustedResults
+    (
+        ApplicationNum,
+        SubscriberID,
+        AssetNum,
+        ModelID,
+        ManufacturerID,
+        ManufacturerName,
+        ModelYear,
+        ConfigurationID,
+        MSRP,
+        AdjustedFinance,
+        AdjustedWholeSale,
+        AdjustedRetail,
+        AdjustedTradeIn,
+        Mileage,
+        NumofAsset
+    )
+SELECT
+    ApplicationNum,
+    SubscriberID,
+    AssetNum,
+    NULL AS ModelID,  
+    NULL AS ManufacturerID, 
+    ModelDescription AS ManufacturerName,  
+    NULL AS ModelYear,  
+    ConfigurationID,
+    MSRP,
+    NULL AS AdjustedFinance,  
+    NULL AS AdjustedWholeSale, 
+    RetailPrice AS AdjustedRetail, 
+    NULL AS AdjustedTradeIn, 
+    NULL AS Mileage,
+    NULL AS NumofAsset
+FROM Sub2007.PriceDigestSelectedTruckBodyValues
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+END
+
+END
+
+END
+GO
+
