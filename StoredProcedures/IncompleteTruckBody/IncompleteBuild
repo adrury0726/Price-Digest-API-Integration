@@ -1,0 +1,67 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/9/2023
+
+This sproc is being built in order to get the truck body buildout information for Price Digest 
+whenever the description of the asset in the Specifications says it's Incomplete.
+
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestGetTruckBodyBuild
+--DECLARE
+    @ApplicationNum INT = 37369,
+	@SubscriberID INT = 2007
+AS
+BEGIN
+
+
+--Adding this so it always inserts a null value that we can later update with the save sproc. Keeps the get from breaking.
+IF NOT EXISTS(SELECT 1 FROM Sub2007.PriceDigestIncompleteTruckBodyBuild WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID)
+BEGIN
+
+INSERT INTO Sub2007.PriceDigestIncompleteTruckBodyBuild
+    (
+        ApplicationNum,
+        SubscriberID,
+        Category,
+        ModelYear,
+        ModelName,
+		AssetSelection
+    )
+VALUES
+    (
+        @ApplicationNum, -- ApplicationNum - int
+        @SubscriberID, -- SubscriberID - int
+        NULL, -- Category - varchar(100)
+        NULL, -- ModelYear - varchar(4)
+        NULL,  -- ModelName - varchar(100)
+		NULL -- AssetSelection - varchar(100)
+    )
+
+END
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+SELECT
+	   ApplicationNum,
+	   SubscriberID,
+	   ConfigurationID,
+	   AssetNum,
+	   Category,
+	   ModelYear,
+	   ModelName,
+	   AssetSelection,
+	   TransientKey
+FROM Sub2007.PriceDigestIncompleteTruckBodyBuild
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+ORDER BY TransientKey DESC 
+
+END
+GO
+
