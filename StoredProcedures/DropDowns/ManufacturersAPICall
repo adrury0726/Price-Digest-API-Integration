@@ -1,0 +1,44 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/7/2023
+
+This sproc is being built in order to insert into the Classifications table for the drop-downs when selecting an asset
+
+*/
+
+ALTER PROCEDURE sub2007.PriceDigestManufacturersAPICall
+--DECLARE
+	@ClassificationID INT,
+    @ManufacturerID INT,
+	@ManufacturerName VARCHAR(100),
+	@ManufacturerAliases VARCHAR(100)
+
+AS
+BEGIN
+
+
+INSERT INTO Sub2007.PriceDigestManufacturers
+    (
+		ClassificationID,
+        ManufacturerID,
+        ManufacturerName,
+        ManufacturerAliases
+    )
+VALUES
+    (
+		@ClassificationID, --ClassificationID - int
+        @ManufacturerID, -- ManufacturerID - int
+        @ManufacturerName, -- ManufacturerName - varchar(100)
+        @ManufacturerAliases  -- ManufacturerAliases - varchar(max)
+    )
+
+END
+
+GO
+
