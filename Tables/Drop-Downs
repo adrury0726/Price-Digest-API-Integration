@@ -1,0 +1,34 @@
+--These tables were created for the Drop-Down menus in Price Digest for the user to select their make/model
+
+
+CREATE TABLE [Sub2007].[PriceDigestClassifications]
+(
+[ClassificationID] [int] NULL,
+[ClassificationName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1)
+) ON [PRIMARY]
+GO
+
+CREATE TABLE [Sub2007].[PriceDigestModels]
+(
+[ClassificationID] [int] NULL,
+[ModelID] [int] NULL,
+[ModelName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ModelAliases] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ManufacturerID] [int] NULL,
+[ManufacturerName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ManufacturerAliases] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1)
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+
+CREATE TABLE [Sub2007].[PriceDigestManufacturers]
+(
+[ClassificationID] [int] NULL,
+[ManufacturerID] [int] NULL,
+[ManufacturerName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ManufacturerAliases] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TransientKey] [int] NOT NULL IDENTITY(1, 1)
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
