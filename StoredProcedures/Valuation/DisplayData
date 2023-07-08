@@ -1,0 +1,39 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+
+/*
+Sproc Author: A-A-Ron Drury
+Date: 6/16/2023
+
+This sproc is being built in order to display the MSRP, Retail, TradeIn, WHolesale, and Finance prices of an asset once selected
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestGetValuation
+--DECLARE
+    @ApplicationNum INT = 37369,
+	@SubscriberID INT = 2007
+AS
+BEGIN
+
+SELECT ApplicationNum,
+	   SubscriberID,
+	   AssetNum,
+	   ModelID,
+	   AssetFullName AS BaseValue,
+	   FORMAT(MSRP, 'C0') AS MSRP,
+	   FORMAT(UnadjustedRetail, 'C0') AS Retail,
+	   FORMAT(UnadjustedTradeIn, 'C0') AS TradeIn,
+	   FORMAT(UnadjustedWholeSale, 'C0') AS Wholesale, 
+	   FORMAT(UnadjustedFinance, 'C0') AS Finance,
+	   ConfigurationID,
+	   TransientKey
+FROM Sub2007.PriceDigestCurrentValuation 
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID
+
+END
+GO
+
