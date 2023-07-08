@@ -1,0 +1,29 @@
+SET QUOTED_IDENTIFIER ON
+SET ANSI_NULLS ON
+GO
+--SET QUOTED_IDENTIFIER ON|OFF
+--SET ANSI_NULLS ON|OFF
+--GO
+/*
+Sproc Author: A-A-Ron Drury
+Date: 5/30/2023
+
+This sproc is being built in order for the C# Code to run this sproc and retrieve the ConfigID for the selected configuration.
+This will allow for the specifications to be pulled in.
+
+*/
+
+ALTER PROCEDURE sub2007.sPriceDigestConfigIDForSpecsCall
+--DECLARE
+    @ApplicationNum INT = 37369,
+	@SubscriberID INT = 2007
+AS
+BEGIN
+
+SELECT DISTINCT ConfigurationID
+FROM Sub2007.PriceDigestCurrentSpecs
+WHERE ApplicationNum = @ApplicationNum AND SubscriberID = @SubscriberID AND Active = 1
+    
+END
+GO
+
